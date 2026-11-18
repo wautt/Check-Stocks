@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CFN search</title>
+<meta name="apple-mobile-web-app-title" content="CFN search">
+<meta name="application-name" content="CFN search">
+<style>
+  :root{
+    --bg:#f5f6f8; --card:#fff; --ink:#1c2230; --muted:#6b7385; --line:#e3e6ec;
+    --accent:#1f5eff; --accent-ink:#fff; --pink:#e53970;
+    --red:#c62828; --red-bg:#fdecec; --amber:#a15c00; --amber-bg:#fff4e0; --ok:#1b7a43;
+    --cols:26px minmax(0,1fr) 74px 80px 20px 44px;
+    --colsw:minmax(0,1fr) 74px 80px 20px 44px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root{ --bg:#14171d; --card:#1d222b; --ink:#e8ebf1; --muted:#97a0b3; --line:#2c333f;
+      --accent:#5b8cff; --accent-ink:#0c1020; --pink:#f0527f; --red:#ff7b7b; --red-bg:#3a1f22; --amber:#ffb454; --amber-bg:#3a2d17; --ok:#58c88a; }
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,"Noto Sans Thai",sans-serif}
+  .wrap{max-width:760px;margin:0 auto;padding:14px 10px 80px}
+  .top{display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:6;background:var(--bg);margin:0;padding:8px 0 6px}
+  h1{font-size:18px;margin:0}
+  .ver{appearance:none;border:0;font:inherit;font-size:11px;font-weight:700;color:var(--accent-ink);background:var(--accent);border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:2px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .ver:active{transform:scale(.94)}
+  .icon{position:relative;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;padding:0}
+  .badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:var(--pink);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:12px}
+  .drop{padding:26px 16px;text-align:center;border:2px dashed var(--line);border-radius:12px;background:var(--card);cursor:pointer}
+  .drop.over{border-color:var(--accent)}
+  .drop b{display:block;margin-bottom:4px}
+  .drop b.only{color:var(--accent);font-size:13.5px}
+  .drop span{color:var(--muted);font-size:13px}
+  .btn{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:8px 12px;font:inherit;cursor:pointer}
+  .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .btn:disabled{opacity:.5;cursor:default}
+  .btn:active{transform:scale(.97)}
+  .bar{position:sticky;top:56px;z-index:5;background:var(--bg);padding:10px 0 8px}
+  .search{display:flex;gap:8px}
+  .search input{flex:1;min-width:0;padding:10px 12px;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+  .search input:focus{outline:2px solid var(--accent);outline-offset:-1px}
+  .meta{display:flex;justify-content:space-between;align-items:center;margin-top:8px;color:var(--muted);font-size:13px;flex-wrap:wrap;row-gap:6px;column-gap:14px}
+  .chk{display:flex;align-items:center;gap:6px;color:var(--ink);font-size:14px;cursor:pointer}
+  .chk input{width:18px;height:18px;margin:0;accent-color:var(--accent)}
+  .chk.off{opacity:.45}
+  .legend{display:flex;gap:12px;font-size:12px;color:var(--muted);margin:2px 0 4px;flex-wrap:wrap}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+  .tip{font-size:12px;color:var(--muted);margin:0 0 10px}
+
+  /* list rows (swipe right to reveal the wishlist bar) */
+  .list{overflow:hidden}
+  .head,.main{display:grid;grid-template-columns:var(--cols);column-gap:3px;align-items:center;padding:8px 6px 8px 4px}
+  .wlh,.pl .main{grid-template-columns:var(--colsw);padding-left:10px}
+  .head{font-size:12px;color:var(--muted);font-weight:600;border-bottom:1px solid var(--line)}
+  .c{text-align:center}
+  .row{position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:var(--card)}
+  .row:last-child{border-bottom:0}
+  .hrt{appearance:none;border:0;background:none;padding:0;margin:0;align-self:stretch;height:100%;min-height:32px;width:26px;font:inherit;font-size:20px;line-height:1;color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent}
+  .hrt::before{content:"\2661\FE0E"}
+  .row.wl .hrt{color:var(--pink)}
+  .row.wl .hrt::before{content:"\2665\FE0E"}
+  .main{position:relative;background:var(--card)}
+  .row.wl .main{background:color-mix(in srgb,var(--pink) 9%,var(--card))}
+  .row.expired .main{box-shadow:inset 3px 0 var(--red)}
+  .row.soon .main{box-shadow:inset 3px 0 var(--amber)}
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;letter-spacing:-.2px;overflow-wrap:anywhere}
+  .cfn{font-weight:600}
+  .exp{font-size:12.5px}
+  .exp small{display:block;font-size:10.5px;line-height:1.2;color:var(--muted);white-space:nowrap}
+  .exp.expired{color:var(--red)} .exp.expired small{color:var(--red)}
+  .exp.soon{color:var(--amber)} .exp.soon small{color:var(--amber)}
+  .sem{text-align:center;font-weight:600;font-size:13px}
+  .cpw{text-align:right}
+  .cp{padding:5px 6px;font-size:12px;white-space:nowrap}
+  .cp.done{background:var(--ok);border-color:var(--ok);color:#fff}
+  .grp{cursor:pointer}
+  .grp .n{color:var(--muted);font-size:12px}
+  .grp .chev{text-align:right;color:var(--muted);font-size:13px}
+  .row.det .main{background:color-mix(in srgb,var(--line) 35%,var(--card))}
+  .row.det.wl .main{background:color-mix(in srgb,var(--pink) 9%,var(--card))}
+  .empty{padding:28px;text-align:center;color:var(--muted)}
+  .err{margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--red-bg);color:var(--red);font-size:14px}
+  .more{display:block;margin:12px auto 0}
+
+  /* wishlist panel */
+  #wlPanel{position:fixed;inset:0;z-index:30;background:var(--bg);display:flex;flex-direction:column}
+  .pw{width:100%;max-width:760px;margin:0 auto;display:flex;flex-direction:column;flex:1;min-height:0;padding:0 10px}
+  .ph{display:flex;align-items:center;gap:10px;padding:12px 0 8px}
+  .ph b{font-size:17px;flex:1}
+  .pa{display:flex;gap:8px;padding:2px 0 10px}
+  .pa .btn{flex:1}
+  .pl{flex:1;overflow:auto;padding-bottom:40px}
+  .rm{padding:4px 9px;font-size:13px}
+  .fly{position:fixed;z-index:60;pointer-events:none;font-size:22px;line-height:1;color:var(--pink);width:22px;height:22px;text-align:center}
+  .semtot{font-size:13px;color:var(--muted);padding:0 2px 8px}
+  .semtot b{color:var(--ink);font-size:15px}
+
+  /* update notice */
+  #news{position:fixed;inset:0;z-index:70;background:rgba(10,14,24,.55);display:flex;align-items:center;justify-content:center;padding:18px}
+  .nc{width:100%;max-width:380px;max-height:92vh;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 18px 16px;box-shadow:0 12px 40px rgba(0,0,0,.25)}
+  .nc h2{margin:0 0 4px;font-size:18px}
+  .nc .sub{color:var(--muted);font-size:13px;margin:0 0 12px}
+  .nc ul{list-style:none;margin:0 0 14px;padding:0;display:grid;gap:10px}
+  .nc li{display:flex;gap:10px;font-size:14px}
+  .nc li i{font-style:normal;flex:0 0 22px;text-align:center}
+  .nc .btn{width:100%}
+  .demo{position:relative;height:64px;margin:4px 0 14px;border-radius:12px;background:var(--bg);overflow:hidden}
+  .demo .dh{position:absolute;left:22px;top:21px;width:22px;font-size:22px;line-height:1;text-align:center;color:var(--pink);animation:flydemo 2.4s ease-in infinite}
+  .demo .dbk{position:absolute;right:22px;top:14px;width:36px;height:36px;display:grid;place-items:center;color:var(--ink);animation:bumpdemo 2.4s ease-in-out infinite}
+  .demo .dbk svg{width:28px;height:28px}
+  .demo .dtrail{position:absolute;left:44px;right:62px;top:32px;border-top:2px dashed var(--line)}
+  @keyframes flydemo{0%{transform:translate(0,0) scale(1);opacity:1}15%{transform:translate(0,0) scale(1.25)}70%{transform:translate(150px,-14px) scale(.9);opacity:1}88%,100%{transform:translate(236px,0) scale(.35);opacity:0}}
+  @keyframes bumpdemo{0%,82%{transform:scale(1)}90%{transform:scale(1.28)}100%{transform:scale(1)}}
+  @media (prefers-reduced-motion: reduce){.demo .dh,.demo .dbk{animation:none}}
+  #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:max-content;background:#222;color:#fff;padding:9px 14px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:92vw;text-align:center;z-index:50;overflow-wrap:anywhere}
+  #toast.show{opacity:.95}
+  [hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>CFN Expiry Search <button id="verBtn" class="ver" type="button" aria-label="What's new in V02">V02</button></h1>
+    <button id="wlBtn" class="icon" type="button" aria-label="Open wishlist">
+      <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 9h18l-1.8 9.6A2 2 0 0 1 17.2 20H6.8a2 2 0 0 1-2-1.4L3 9z"/>
+        <path d="M8 9l3-5M16 9l-3-5"/>
+        <path d="M12 17.4l-2.9-2.8c-1.5-1.6-.6-3.5 1.1-3.5.8 0 1.4.4 1.8 1 .4-.6 1-1 1.8-1 1.7 0 2.6 1.9 1.1 3.5z" fill="#e53970" stroke="#e53970" stroke-width="1"/>
+      </svg>
+      <span id="wlCount" class="badge" hidden>0</span>
+    </button>
+  </div>
+
+  <div id="dropzone" class="drop" tabindex="0" role="button">
+    <b>Choose an Excel file (.xlsx)</b>
+    <b class="only">MM0002 A-Actual Stock Report file only</b>
+    <span>Tap to select, or drop a file here · The file is read on your device and never uploaded</span>
+    <input id="file" type="file" accept=".xlsx,.xlsm" hidden>
+  </div>
+  <div id="error" class="err" hidden></div>
+
+  <div id="app" hidden>
+    <div class="bar">
+      <div class="search">
+        <input id="q" type="search" placeholder="Search CFN, e.g. W3DR01" autocomplete="off" autocapitalize="characters" spellcheck="false">
+        <button id="reload" class="btn" type="button">Change file</button>
+      </div>
+      <div class="meta">
+        <span id="count"></span>
+        <label class="chk" id="hideLbl"><input id="hideExp" type="checkbox"> Hide expired</label>
+        <label class="chk"><input id="nearExp" type="checkbox"> Near expiry (90 days)</label>
+      </div>
+    </div>
+    <div class="legend">
+      <span><i style="background:var(--red)"></i>Expired</span>
+      <span><i style="background:var(--amber)"></i>Expires within 90 days</span>
+      <span id="fileinfo"></span>
+    </div>
+    <p class="tip">Tip: tap the heart ♡ on a row to add it to your wishlist</p>
+    <div class="card list">
+      <div class="head"><span></span><span>CFN</span><span id="th2">Batch</span><span>Exp</span><span class="c">SEM</span><span></span></div>
+      <div id="rows"></div>
+      <div id="empty" class="empty" hidden>No items found</div>
+    </div>
+    <button id="more" class="btn more" type="button" hidden></button>
+  </div>
+</div>
+
+<div id="wlPanel" hidden>
+  <div class="pw">
+    <div class="ph">
+      <button id="wlBack" class="btn" type="button">‹ Back</button>
+      <b id="wlTitle">Wishlist</b>
+    </div>
+    <div class="pa">
+      <button id="wlCopy" class="btn primary" type="button">Copy all</button>
+      <button id="wlClear" class="btn" type="button">Clear all</button>
+    </div>
+    <div id="wlSem" class="semtot" hidden></div>
+    <div class="card pl-card" style="overflow:hidden;flex:1;min-height:0;display:flex;flex-direction:column">
+      <div class="head wlh"><span>CFN</span><span>Batch</span><span>Exp</span><span class="c">SEM</span><span></span></div>
+      <div id="wlList" class="pl"></div>
+    </div>
+  </div>
+</div>
+<div id="news" hidden role="dialog" aria-modal="true" aria-labelledby="newsTitle">
+  <div class="nc">
+    <h2 id="newsTitle">What's new in V02</h2>
+    <p class="sub">Tap the V02 tag at the top anytime to see this again.</p>
+    <div class="demo" aria-hidden="true"><span class="dh">&#9829;&#xFE0E;</span><i class="dtrail"></i><span class="dbk" id="demoBasket"></span></div>
+    <ul>
+      <li><i>&#9829;&#xFE0E;</i><span><b>Wishlist</b> &mdash; tap the heart on any row to save it. It flies into the basket at the top right.</span></li>
+      <li><i>&#128722;&#xFE0E;</i><span><b>Basket</b> &mdash; see everything you saved, remove items, or <b>Copy all</b> (CFN + Batch, one per line).</span></li>
+      <li><i>&#9733;&#xFE0E;</i><span><b>SEM points</b> &mdash; shown on every row and totaled in your wishlist.</span></li>
+      <li><i>&#8679;&#xFE0E;</i><span><b>Header stays on top</b> &mdash; the basket is always in view while you scroll.</span></li>
+      <li><i>&#9889;&#xFE0E;</i><span><b>Lighter list</b> &mdash; the wishlist is a simple tap, no swiping needed.</span></li>
+    </ul>
+    <button id="newsOk" class="btn primary" type="button">Got it</button>
+  </div>
+</div>
+<div id="toast"></div>
+
+<script>
+/* ---------- xlsx reader (no external library) ---------- */
+async function inflateRaw(bytes){
+  const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+  return new Uint8Array(await new Response(stream).arrayBuffer());
+}
+async function unzip(buf){
+  const u8 = new Uint8Array(buf), dv = new DataView(buf);
+  let eocd = -1;
+  for (let i = u8.length - 22; i >= Math.max(0, u8.length - 70000); i--){
+    if (dv.getUint32(i, true) === 0x06054b50){ eocd = i; break; }
+  }
+  if (eocd < 0) throw new Error('Not a valid .xlsx file');
+  const n = dv.getUint16(eocd + 10, true);
+  let p = dv.getUint32(eocd + 16, true);
+  const dec = new TextDecoder(), files = {};
+  for (let i = 0; i < n; i++){
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true);
+    const nl = dv.getUint16(p + 28, true), el = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true);
+    const off = dv.getUint32(p + 42, true);
+    const name = dec.decode(u8.subarray(p + 46, p + 46 + nl));
+    files[name] = {method, csize, off};
+    p += 46 + nl + el + cl;
+  }
+  return {
+    async text(name){
+      const f = files[name]; if (!f) return null;
+      const ln = dv.getUint16(f.off + 26, true), le = dv.getUint16(f.off + 28, true);
+      const start = f.off + 30 + ln + le;
+      const raw = u8.subarray(start, start + f.csize);
+      const out = f.method === 0 ? raw : await inflateRaw(raw);
+      return dec.decode(out);
+    },
+    has(name){ return !!files[name]; }
+  };
+}
+const unesc = s => s.replace(/&lt;/g,'<').replace(/&gt;/g,'>').replace(/&quot;/g,'"').replace(/&apos;/g,"'")
+  .replace(/&#(\d+);/g,(_,d)=>String.fromCodePoint(+d)).replace(/&#x([0-9a-f]+);/gi,(_,h)=>String.fromCodePoint(parseInt(h,16))).replace(/&amp;/g,'&');
+function textOf(xml){
+  xml = xml.replace(/<rPh\b[\s\S]*?<\/rPh>/g,'');
+  let s = '', m; const re = /<t\b[^>]*>([\s\S]*?)<\/t>/g;
+  while ((m = re.exec(xml))) s += m[1];
+  return unesc(s);
+}
+function colIndex(letters){ let n = 0; for (const c of letters) n = n * 26 + c.charCodeAt(0) - 64; return n - 1; }
+
+async function readSheets(buf){
+  const z = await unzip(buf);
+  const wb = await z.text('xl/workbook.xml');
+  if (!wb) throw new Error('No workbook data found in the file');
+  const rels = (await z.text('xl/_rels/workbook.xml.rels')) || '';
+  const relMap = {};
+  for (const m of rels.matchAll(/<Relationship\b[^>]*>/g)){
+    const id = /\bId="([^"]*)"/.exec(m[0]), tg = /\bTarget="([^"]*)"/.exec(m[0]);
+    if (id && tg) relMap[id[1]] = tg[1];
+  }
+  const sheets = [];
+  for (const m of wb.matchAll(/<sheet\b[^>]*>/g)){
+    const name = /\bname="([^"]*)"/.exec(m[0]), rid = /\br:id="([^"]*)"/.exec(m[0]);
+    if (!name || !rid || !relMap[rid[1]]) continue;
+    let t = relMap[rid[1]];
+    t = t.startsWith('/') ? t.slice(1) : 'xl/' + t;
+    sheets.push({name: unesc(name[1]), path: t});
+  }
+  const sst = [];
+  const ss = await z.text('xl/sharedStrings.xml');
+  if (ss) for (const m of ss.matchAll(/<si\b[^>]*>([\s\S]*?)<\/si>/g)) sst.push(textOf(m[1]));
+  return {z, sheets, sst};
+}
+async function sheetRows(z, path, sst, maxRows){
+  const xml = await z.text(path); if (!xml) return [];
+  const rows = [];
+  const rowRe = /<row\b([^>]*?)(?:\/>|>([\s\S]*?)<\/row>)/g;
+  let rm;
+  while ((rm = rowRe.exec(xml))){
+    const rn = /\br="(\d+)"/.exec(rm[1]);
+    const rowNum = rn ? +rn[1] : rows.length + 1;
+    const cells = [];
+    if (rm[2]){
+      const cRe = /<c\b([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g; let cm;
+      while ((cm = cRe.exec(rm[2]))){
+        const at = cm[1];
+        const r = /\br="([A-Z]+)\d+"/.exec(at); if (!r) continue;
+        const t = (/\bt="([^"]*)"/.exec(at) || [])[1];
+        const body = cm[2] || '';
+        let val = null;
+        if (t === 'inlineStr') val = textOf(body);
+        else {
+          const v = /<v>([\s\S]*?)<\/v>/.exec(body);
+          if (v){
+            if (t === 's') val = sst[+v[1]];
+            else if (t === 'str' || t === 'e') val = unesc(v[1]);
+            else if (t === 'b') val = v[1] === '1';
+            else val = parseFloat(v[1]);
+          }
+        }
+        cells[colIndex(r[1])] = val;
+      }
+    }
+    rows[rowNum - 1] = cells;
+    if (maxRows && rowNum >= maxRows) break;
+  }
+  return rows;
+}
+
+/* ---------- find CFN / Batch / Exp ---------- */
+const norm = v => (v == null ? '' : String(v)).replace(/\s+/g,' ').trim();
+function toDate(v){
+  if (v == null || v === '') return null;
+  if (typeof v === 'number'){
+    if (v < 1) return null;
+    return new Date(Date.UTC(1899, 11, 30) + Math.round(v) * 86400000);
+  }
+  const s = String(v).trim();
+  let m = /^(\d{4})[-\/.](\d{1,2})[-\/.](\d{1,2})/.exec(s);
+  if (m) return new Date(Date.UTC(+m[1], +m[2]-1, +m[3]));
+  m = /^(\d{1,2})[-\/.](\d{1,2})[-\/.](\d{4})/.exec(s);
+  if (m) return new Date(Date.UTC(+m[3], +m[2]-1, +m[1]));
+  return null;
+}
+function findColumns(hdr){
+  const h = hdr.map(norm);
+  const cfn = h.findIndex(x => /^cfn$/i.test(x));
+  let batch = h.findIndex(x => /^batch no\.?$/i.test(x));
+  if (batch < 0) batch = h.findIndex(x => /batch/i.test(x) && !/real|expir/i.test(x));
+  let exp = h.findIndex(x => /expiry/i.test(x) && !/days|expired/i.test(x));
+  if (exp < 0) exp = h.findIndex(x => /^exp/i.test(x) && !/days|expired/i.test(x));
+  return {cfn, batch, exp};
+}
+async function extract(buf){
+  const {z, sheets, sst} = await readSheets(buf);
+  for (const sh of sheets){
+    const rows = await sheetRows(z, sh.path, sst);
+    for (let i = 0; i < Math.min(rows.length, 30); i++){
+      if (!rows[i]) continue;
+      const c = findColumns(Array.from(rows[i], x => x));
+      if (c.cfn >= 0 && c.batch >= 0 && c.exp >= 0){
+        const seen = new Set(), out = [];
+        let raw = 0;
+        for (let r = i + 1; r < rows.length; r++){
+          const row = rows[r]; if (!row) continue;
+          const cfn = norm(row[c.cfn]); if (!cfn) continue;
+          raw++;
+          const batch = norm(row[c.batch]);
+          const d = toDate(row[c.exp]);
+          const key = cfn + '|' + batch + '|' + (d ? +d : '');
+          if (seen.has(key)) continue;
+          seen.add(key);
+          out.push({cfn, batch, exp: d ? +d : null});
+        }
+        out.sort((a, b) => (a.exp ?? Infinity) - (b.exp ?? Infinity) || a.cfn.localeCompare(b.cfn));
+        return {sheet: sh.name, rows: out, raw};
+      }
+    }
+  }
+  throw new Error('Could not find the CFN, Batch No. and Batch Expiry Date columns in this file');
+}
+
+/* ---------- UI ---------- */
+if (typeof document !== 'undefined'){
+const $ = id => document.getElementById(id);
+const PAGE = 300, NEAR_DAYS = 90;
+let data = [], shown = PAGE, filtered = [], refs = [];
+const todayUTC = (()=>{ const n = new Date(); return Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()); })();
+const squash = s => s.toUpperCase().replace(/[\s\-_.\/]/g,'');
+const keyOf = r => r.cfn + '|' + r.batch + '|' + (r.exp == null ? '' : r.exp);
+function el(tag, cls, text){ const e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+
+function fmt(ms){
+  const d = new Date(ms);
+  return String(d.getUTCDate()).padStart(2,'0') + '/' + String(d.getUTCMonth()+1).padStart(2,'0') + '/' + d.getUTCFullYear();
+}
+function expInfo(ms){
+  if (ms == null) return {cls:'', text:'-', sub:''};
+  const days = Math.round((ms - todayUTC) / 86400000);
+  const far = new Date(ms).getUTCFullYear() >= 2099;
+  const n = Math.abs(days).toLocaleString();
+  if (days < 0) return {cls:'expired', text:fmt(ms), sub:'(' + n + (days === -1 ? ' day ago)' : ' days ago)')};
+  if (days === 0) return {cls:'soon', text:fmt(ms), sub:'(today)'};
+  if (days <= 90) return {cls:'soon', text:fmt(ms), sub:'(' + n + (days === 1 ? ' day left)' : ' days left)')};
+  return {cls:'', text:fmt(ms), sub: far ? '' : '(' + n + ' days left)'};
+}
+function semPts(ms){
+  if (ms == null) return '';
+  const d = Math.round((ms - todayUTC) / 86400000);
+  if (d >= 0 && d <= 30) return 7;
+  if (d >= 31 && d <= 60) return 5;
+  if (d >= 61 && d <= 90) return 3;
+  return '';
+}
+function expSpan(e){ const s = el('span', 'exp' + (e.cls ? ' ' + e.cls : ''), e.text); if (e.sub) s.append(el('small', null, e.sub)); return s; }
+function semSpan(ms){ const v = semPts(ms); const s = el('span', 'sem', v === '' ? '-' : String(v)); if (v === '') s.style.color = 'var(--muted)'; return s; }
+
+/* ---------- wishlist store ---------- */
+const wl = new Map();
+try { JSON.parse(localStorage.getItem('wl_v02') || '[]').forEach(r => { if (r && r.cfn) wl.set(keyOf(r), r); }); } catch(e){}
+function persist(){ try { localStorage.setItem('wl_v02', JSON.stringify([...wl.values()])); } catch(e){} }
+function updateBadge(){ const b = $('wlCount'); b.textContent = wl.size; b.hidden = wl.size === 0; }
+function refreshTints(){
+  document.querySelectorAll('#rows .row[data-key]').forEach(row => {
+    const has = wl.has(row.dataset.key);
+    row.classList.toggle('wl', has);
+  });
+}
+const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+function bump(){
+  try {
+    $('wlBtn').animate([{transform:'scale(1)'},{transform:'scale(1.25)'},{transform:'scale(1)'}], {duration:320, easing:'ease-out'});
+    if (!$('wlCount').hidden) $('wlCount').animate([{transform:'scale(1)'},{transform:'scale(1.5)'},{transform:'scale(1)'}], {duration:360});
+  } catch(e){}
+}
+function flyToBasket(src, done){
+  if (!src || !src.animate || reduceMotion()){ done(); return; }
+  const a = src.getBoundingClientRect(), b = $('wlBtn').getBoundingClientRect();
+  const dot = el('div', 'fly', '\u2665\uFE0E');
+  dot.style.left = (a.left + a.width / 2 - 11) + 'px'; dot.style.top = (a.top + a.height / 2 - 11) + 'px';
+  document.body.append(dot);
+  const dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
+  let fin = false; const end = () => { if (fin) return; fin = true; dot.remove(); done(); };
+  try {
+    const an = dot.animate([
+      {transform:'translate(0,0) scale(1)', opacity:1, offset:0},
+      {transform:'translate(' + dx * 0.2 + 'px,' + (Math.min(dy, 0) * 0.2 - 36) + 'px) scale(1.5)', opacity:1, offset:.28},
+      {transform:'translate(' + dx + 'px,' + dy + 'px) scale(.4)', opacity:.85, offset:1}
+    ], {duration:620, easing:'cubic-bezier(.45,.05,.75,.45)', fill:'forwards'});
+    an.onfinish = end; setTimeout(end, 900);
+  } catch(e){ end(); }
+}
+function toggleWish(r, src){
+  const k = keyOf(r);
+  if (wl.has(k)){ wl.delete(k); persist(); refreshTints(); updateBadge(); toast('Removed from wishlist'); return; }
+  wl.set(k, {cfn:r.cfn, batch:r.batch, exp:r.exp});
+  persist(); refreshTints();
+  flyToBasket(src, () => { updateBadge(); bump(); });
+}
+
+/* ---------- rows ---------- */
+function makeRow(r, i, mode){
+  const e = expInfo(r.exp), k = keyOf(r);
+  const row = el('div', 'row' + (e.cls ? ' ' + e.cls : '') + (mode === 'det' ? ' det' : ''));
+  row.dataset.key = k;
+  if (wl.has(k)) row.classList.add('wl');
+  const main = el('div', 'main');
+  if (mode !== 'wl'){
+    row.dataset.i = i;
+    const hb = el('button', 'hrt'); hb.type = 'button'; hb.setAttribute('aria-label', 'Add to wishlist');
+    main.append(hb);
+  }
+  if (mode === 'det'){
+    const bt = el('span', 'mono', r.batch); bt.style.gridColumn = '2 / 4'; bt.style.paddingLeft = '8px'; main.append(bt);
+  } else main.append(el('span', 'cfn mono', r.cfn), el('span', 'mono', r.batch));
+  main.append(expSpan(e), semSpan(r.exp));
+  const w = el('span', 'cpw');
+  if (mode === 'wl'){ const x = el('button', 'btn cp rm', '✕'); x.type = 'button'; x.dataset.key = k; x.setAttribute('aria-label', 'Remove'); w.append(x); }
+  else { const c = el('button', 'btn cp', 'Copy'); c.type = 'button'; c.dataset.i = i; w.append(c); }
+  main.append(w); row.append(main);
+  return row;
+}
+
+function render(){
+  const q = squash($('q').value);
+  const near = $('nearExp').checked;
+  const hide = !near && $('hideExp').checked;
+  $('hideExp').disabled = near; $('hideLbl').classList.toggle('off', near);
+  $('th2').textContent = near ? 'Batches' : 'Batch';
+  const nearMax = todayUTC + NEAR_DAYS * 86400000;
+  filtered = data.filter(r =>
+    (!near || (r.exp != null && r.exp >= todayUTC && r.exp <= nearMax)) &&
+    (!hide || r.exp == null || r.exp >= todayUTC) &&
+    (!q || squash(r.cfn).includes(q) || squash(r.batch).includes(q)));
+  const body = $('rows'); body.textContent = '';
+  const frag = document.createDocumentFragment();
+  refs = [];
+  let total, rest;
+  if (!near){
+    filtered.slice(0, shown).forEach(r => { refs.push(r); frag.append(makeRow(r, refs.length - 1, 'list')); });
+    total = filtered.length; rest = total - shown;
+    $('count').textContent = total.toLocaleString() + ' items' + (q || hide ? ' (of ' + data.length.toLocaleString() + ')' : '');
+  } else {
+    const groups = new Map();
+    filtered.forEach(r => { if (!groups.has(r.cfn)) groups.set(r.cfn, []); groups.get(r.cfn).push(r); });
+    const list = [...groups.entries()];
+    list.slice(0, shown).forEach(([cfn, items]) => {
+      const e = expInfo(items[0].exp);
+      const g = el('div', 'row grp soon'); g.dataset.g = cfn;
+      const m = el('div', 'main');
+      m.append(el('span'), el('span', 'cfn mono', cfn), el('span', 'n', items.length + (items.length === 1 ? ' batch' : ' batches')), expSpan(e), el('span'), el('span', 'chev', '▸'));
+      g.append(m); frag.append(g);
+      items.forEach(r => { refs.push(r); const d = makeRow(r, refs.length - 1, 'det'); d.hidden = true; frag.append(d); });
+    });
+    total = list.length; rest = total - shown;
+    $('count').textContent = total.toLocaleString() + ' CFN · ' + filtered.length.toLocaleString() + (filtered.length === 1 ? ' batch' : ' batches') + ' near expiry';
+  }
+  body.append(frag);
+  $('empty').hidden = total > 0;
+  $('more').hidden = rest <= 0;
+  if (rest > 0) $('more').textContent = 'Show more (' + rest.toLocaleString() + ' left)';
+}
+
+/* ---------- toast / copy ---------- */
+let toastT;
+function toast(msg){
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 1800);
+}
+async function copyText(text){
+  try { await navigator.clipboard.writeText(text); return true; } catch(e){}
+  try {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+    document.body.append(ta); ta.focus(); ta.select();
+    const ok = document.execCommand('copy'); ta.remove(); return ok;
+  } catch(e){ return false; }
+}
+const lineOf = r => r.cfn + ' Batch: ' + r.batch;
+
+const rowsEl = $('rows');
+
+rowsEl.addEventListener('click', async ev => {
+  const hb = ev.target.closest('.hrt');
+  if (hb){ const r = refs[+hb.closest('.row').dataset.i]; if (r) toggleWish(r, hb); return; }
+  const b = ev.target.closest('.cp');
+  if (b){
+    const r = refs[+b.dataset.i]; if (!r) return;
+    const text = lineOf(r);
+    if (await copyText(text)){
+      b.classList.add('done'); b.textContent = '✓';
+      setTimeout(() => { b.classList.remove('done'); b.textContent = 'Copy'; }, 1200);
+      toast('Copied: ' + text);
+    } else toast('Copy failed. Long-press the text to copy it manually.');
+    return;
+  }
+  const g = ev.target.closest('.row.grp');
+  if (g){
+    let n = g.nextElementSibling, open = null;
+    while (n && n.classList.contains('det')){ if (open === null) open = n.hidden; n.hidden = !open; n = n.nextElementSibling; }
+    g.querySelector('.chev').textContent = open ? '▾' : '▸';
+    return;
+  }
+});
+
+/* ---------- wishlist panel ---------- */
+function wlItems(){ return [...wl.values()].sort((a, b) => (a.exp ?? Infinity) - (b.exp ?? Infinity) || a.cfn.localeCompare(b.cfn)); }
+function renderPanel(){
+  const items = wlItems(), list = $('wlList'); list.textContent = '';
+  $('wlTitle').textContent = 'Wishlist (' + items.length + ')';
+  $('wlCopy').disabled = $('wlClear').disabled = items.length === 0;
+  const sem = $('wlSem');
+  if (items.length){
+    const tot = items.reduce((s, r) => s + (semPts(r.exp) || 0), 0);
+    sem.textContent = ''; sem.append('Total SEM points: ', el('b', null, String(tot)), ' \u00B7 ' + items.length + (items.length === 1 ? ' item' : ' items'));
+    sem.hidden = false;
+  } else sem.hidden = true;
+  if (!items.length){
+    list.append(el('div', 'empty', 'No items yet. Tap the heart on a row to add it.'));
+    return;
+  }
+  const frag = document.createDocumentFragment();
+  items.forEach(r => frag.append(makeRow(r, -1, 'wl')));
+  list.append(frag);
+}
+function openPanel(){ renderPanel(); $('wlPanel').hidden = false; document.body.style.overflow = 'hidden'; }
+function closePanel(){ $('wlPanel').hidden = true; document.body.style.overflow = ''; resetClear(); }
+$('wlBtn').onclick = openPanel;
+$('wlBack').onclick = closePanel;
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('wlPanel').hidden) closePanel(); });
+$('wlList').addEventListener('click', ev => {
+  const x = ev.target.closest('.rm'); if (!x) return;
+  wl.delete(x.dataset.key); persist(); refreshTints(); updateBadge(); renderPanel();
+});
+$('wlCopy').onclick = async () => {
+  const items = wlItems(); if (!items.length) return;
+  const text = items.map(lineOf).join('\n');
+  if (await copyText(text)) toast('Copied ' + items.length + (items.length === 1 ? ' item' : ' items'));
+  else toast('Copy failed. Please try again.');
+};
+let clearT;
+function resetClear(){ clearTimeout(clearT); $('wlClear').textContent = 'Clear all'; $('wlClear').dataset.arm = ''; }
+$('wlClear').onclick = () => {
+  const b = $('wlClear');
+  if (b.dataset.arm !== '1'){ b.dataset.arm = '1'; b.textContent = 'Tap again to clear'; clearT = setTimeout(resetClear, 3000); return; }
+  resetClear(); wl.clear(); persist(); refreshTints(); updateBadge(); renderPanel();
+};
+
+/* ---------- search / filters / file ---------- */
+$('more').onclick = () => { shown += PAGE; render(); };
+let qT; $('q').addEventListener('input', () => { clearTimeout(qT); qT = setTimeout(() => { shown = PAGE; render(); }, 120); });
+$('hideExp').onchange = () => { shown = PAGE; render(); };
+$('nearExp').onchange = () => { shown = PAGE; render(); };
+
+async function load(file){
+  $('error').hidden = true;
+  try {
+    const res = await extract(await file.arrayBuffer());
+    data = res.rows; shown = PAGE; $('q').value = '';
+    $('fileinfo').textContent = file.name + ' · Sheet: ' + res.sheet;
+    $('dropzone').hidden = true; $('app').hidden = false;
+    render(); $('q').focus();
+  } catch(e){
+    $('error').textContent = 'Could not read the file: ' + (e.message || e); $('error').hidden = false;
+  }
+}
+const pick = () => $('file').click();
+$('dropzone').onclick = pick;
+$('dropzone').onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') pick(); };
+$('reload').onclick = () => { $('file').value = ''; pick(); };
+$('file').onchange = e => { if (e.target.files[0]) load(e.target.files[0]); };
+['dragover','dragenter'].forEach(n => document.addEventListener(n, e => { e.preventDefault(); $('dropzone').classList.add('over'); }));
+['dragleave','drop'].forEach(n => document.addEventListener(n, e => { e.preventDefault(); $('dropzone').classList.remove('over'); }));
+document.addEventListener('drop', e => { const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) load(f); });
+updateBadge();
+
+/* ---------- update notice (shown once per version) ---------- */
+const NEWS_KEY = 'news_seen_v02c';
+function closeNews(){ $('news').hidden = true; try { localStorage.setItem(NEWS_KEY, '1'); } catch(e){} }
+try { $('demoBasket').append($('wlBtn').querySelector('svg').cloneNode(true)); } catch(e){}
+$('newsOk').onclick = closeNews;
+$('verBtn').onclick = () => { $('news').hidden = false; };
+$('news').addEventListener('click', e => { if (e.target === $('news')) closeNews(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('news').hidden) closeNews(); });
+let seen = false; try { seen = !!localStorage.getItem(NEWS_KEY); } catch(e){}
+if (!seen) $('news').hidden = false;
+}
+</script>
+</body>
+</html>
