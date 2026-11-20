@@ -6,6 +6,8 @@
 <title>CFN search</title>
 <meta name="apple-mobile-web-app-title" content="CFN search">
 <meta name="application-name" content="CFN search">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/png" href="apple-touch-icon.png">
 <style>
   :root{
     --bg:#f5f6f8; --card:#fff; --ink:#1c2230; --muted:#6b7385; --line:#e3e6ec;
@@ -13,6 +15,7 @@
     --red:#c62828; --red-bg:#fdecec; --amber:#a15c00; --amber-bg:#fff4e0; --ok:#1b7a43;
     --cols:26px minmax(0,1fr) 74px 80px 20px 44px;
     --colsw:minmax(0,1fr) 74px 80px 20px 44px;
+    --colss:22px 26px minmax(0,1fr) 74px 84px;
   }
   @media (prefers-color-scheme: dark){
     :root{ --bg:#14171d; --card:#1d222b; --ink:#e8ebf1; --muted:#97a0b3; --line:#2c333f;
@@ -26,7 +29,7 @@
   .ver{appearance:none;border:0;font:inherit;font-size:11px;font-weight:700;color:var(--accent-ink);background:var(--accent);border-radius:6px;padding:2px 7px;margin-left:6px;vertical-align:2px;cursor:pointer;-webkit-tap-highlight-color:transparent}
   .ver:active{transform:scale(.94)}
   .icon{position:relative;width:42px;height:42px;display:grid;place-items:center;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer;padding:0}
-  .badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:var(--pink);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+  .badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;border-radius:9px;background:var(--accent);color:var(--accent-ink);font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 4px}
   .card{background:var(--card);border:1px solid var(--line);border-radius:12px}
   .drop{padding:26px 16px;text-align:center;border:2px dashed var(--line);border-radius:12px;background:var(--card);cursor:pointer}
   .drop.over{border-color:var(--accent)}
@@ -49,7 +52,7 @@
   .legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
   .tip{font-size:12px;color:var(--muted);margin:0 0 10px}
 
-  /* list rows (swipe right to reveal the wishlist bar) */
+  /* list rows (add-to-basket button) */
   .list{overflow:hidden}
   .head,.main{display:grid;grid-template-columns:var(--cols);column-gap:3px;align-items:center;padding:8px 6px 8px 4px}
   .wlh,.pl .main{grid-template-columns:var(--colsw);padding-left:10px}
@@ -58,11 +61,11 @@
   .row{position:relative;overflow:hidden;border-bottom:1px solid var(--line);background:var(--card)}
   .row:last-child{border-bottom:0}
   .hrt{appearance:none;border:0;background:none;padding:0;margin:0;align-self:stretch;height:100%;min-height:32px;width:26px;font:inherit;font-size:20px;line-height:1;color:var(--muted);cursor:pointer;-webkit-tap-highlight-color:transparent}
-  .hrt::before{content:"\2661\FE0E"}
-  .row.wl .hrt{color:var(--pink)}
-  .row.wl .hrt::before{content:"\2665\FE0E"}
+  .hrt::before{content:"";display:block;width:20px;height:20px;margin:auto;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9h18l-2 10.5a2 2 0 0 1-2 1.5H7a2 2 0 0 1-2-1.5z'/%3E%3Cpath d='M8 9l3-5M16 9l-3-5'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M3 9h18l-2 10.5a2 2 0 0 1-2 1.5H7a2 2 0 0 1-2-1.5z'/%3E%3Cpath d='M8 9l3-5M16 9l-3-5'/%3E%3C/svg%3E") center/contain no-repeat}
+  .row.wl .hrt{color:var(--accent)}
+  .row.wl .hrt::before{-webkit-mask:none;mask:none;background:none;content:"\2713\FE0E";display:grid;place-items:center;width:22px;height:22px;border-radius:50%;font-size:13px;font-weight:700;background-color:var(--accent);color:var(--accent-ink)}
   .main{position:relative;background:var(--card)}
-  .row.wl .main{background:color-mix(in srgb,var(--pink) 9%,var(--card))}
+  .row.wl .main{background:color-mix(in srgb,var(--accent) 9%,var(--card))}
   .row.expired .main{box-shadow:inset 3px 0 var(--red)}
   .row.soon .main{box-shadow:inset 3px 0 var(--amber)}
   .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px;letter-spacing:-.2px;overflow-wrap:anywhere}
@@ -79,13 +82,13 @@
   .grp .n{color:var(--muted);font-size:12px}
   .grp .chev{text-align:right;color:var(--muted);font-size:13px}
   .row.det .main{background:color-mix(in srgb,var(--line) 35%,var(--card))}
-  .row.det.wl .main{background:color-mix(in srgb,var(--pink) 9%,var(--card))}
+  .row.det.wl .main{background:color-mix(in srgb,var(--accent) 9%,var(--card))}
   .empty{padding:28px;text-align:center;color:var(--muted)}
   .err{margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--red-bg);color:var(--red);font-size:14px}
   .more{display:block;margin:12px auto 0}
 
   /* wishlist panel */
-  #wlPanel{position:fixed;inset:0;z-index:30;background:var(--bg);display:flex;flex-direction:column}
+  #wlPanel{position:fixed;inset:0;z-index:35;background:var(--bg);display:flex;flex-direction:column}
   .pw{width:100%;max-width:760px;margin:0 auto;display:flex;flex-direction:column;flex:1;min-height:0;padding:0 10px}
   .ph{display:flex;align-items:center;gap:10px;padding:12px 0 8px}
   .ph b{font-size:17px;flex:1}
@@ -93,7 +96,39 @@
   .pa .btn{flex:1}
   .pl{flex:1;overflow:auto;padding-bottom:40px}
   .rm{padding:4px 9px;font-size:13px}
-  .fly{position:fixed;z-index:60;pointer-events:none;font-size:22px;line-height:1;color:var(--pink);width:22px;height:22px;text-align:center}
+
+  .tr{display:flex;gap:8px;position:relative}
+  .menu{position:absolute;right:0;top:50px;min-width:190px;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:6px;z-index:20}
+  .mi{display:block;width:100%;text-align:left;border:0;background:none;color:var(--ink);font:inherit;padding:11px 12px;border-radius:8px;cursor:pointer}
+  .mi:active{background:var(--bg)}
+  .icon.sm{width:38px;height:38px}
+  .ov{position:fixed;inset:0;z-index:80;background:rgba(10,14,24,.55);display:flex;align-items:center;justify-content:center;padding:18px}
+  .two{display:flex;gap:8px;margin-top:12px}.two .btn{flex:1}
+  #pinIn{width:100%;padding:12px;font-size:24px;letter-spacing:.5em;text-align:center;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+  #pinIn:focus{outline:2px solid var(--accent);outline-offset:-1px}
+  #pinErr{margin-top:8px;text-align:center}
+  .nc.bad{animation:shake .35s}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-9px)}40%{transform:translateX(9px)}60%{transform:translateX(-6px)}80%{transform:translateX(6px)}}
+  .xo{display:flex;align-items:center;gap:8px;padding:9px 0;border-top:1px solid var(--line);font-size:14px}
+  .xo:first-child{border-top:0}
+  .xo span{flex:1}
+  .nc .xo .btn{width:auto;flex:none;padding:6px 12px;font-size:13px}
+  .xo span{white-space:nowrap}
+  /* sales page */
+  #sales{position:fixed;inset:0;z-index:30;background:var(--bg);display:flex;flex-direction:column}
+  .sc{padding:10px;display:grid;gap:8px;margin-bottom:8px}
+  .sc input[type=search]{width:100%;padding:10px 12px;font:inherit;font-size:16px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink)}
+  .sc input[type=search]:focus{outline:2px solid var(--accent);outline-offset:-1px}
+  .req{display:flex;align-items:center;gap:8px;font-size:14px;margin-top:8px}
+  .req input{width:84px;padding:8px;font:inherit;font-size:16px;text-align:center;border:1px solid var(--line);border-radius:8px;background:var(--card);color:var(--ink)}
+  .chips{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+  .chip{appearance:none;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:4px 11px;font:inherit;font-size:13px;cursor:pointer}
+  .chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .chips .chk{font-size:13px;margin-left:auto}
+  .sa .btn{font-size:13px;padding:8px 6px}
+  .shead,.srow .main{grid-template-columns:var(--colss)}
+  .sck{width:18px;height:18px;margin:0;justify-self:center;accent-color:var(--accent)}
+  .fly{position:fixed;z-index:60;pointer-events:none;font-size:22px;line-height:1;color:var(--accent);width:22px;height:22px;text-align:center}
   .semtot{font-size:13px;color:var(--muted);padding:0 2px 8px}
   .semtot b{color:var(--ink);font-size:15px}
 
@@ -107,7 +142,7 @@
   .nc li i{font-style:normal;flex:0 0 22px;text-align:center}
   .nc .btn{width:100%}
   .demo{position:relative;height:64px;margin:4px 0 14px;border-radius:12px;background:var(--bg);overflow:hidden}
-  .demo .dh{position:absolute;left:22px;top:21px;width:22px;font-size:22px;line-height:1;text-align:center;color:var(--pink);animation:flydemo 2.4s ease-in infinite}
+  .demo .dh{position:absolute;left:22px;top:21px;width:22px;font-size:22px;line-height:1;text-align:center;color:var(--accent);animation:flydemo 2.4s ease-in infinite}
   .demo .dbk{position:absolute;right:22px;top:14px;width:36px;height:36px;display:grid;place-items:center;color:var(--ink);animation:bumpdemo 2.4s ease-in-out infinite}
   .demo .dbk svg{width:28px;height:28px}
   .demo .dtrail{position:absolute;left:44px;right:62px;top:32px;border-top:2px dashed var(--line)}
@@ -117,25 +152,148 @@
   #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);width:max-content;background:#222;color:#fff;padding:9px 14px;border-radius:20px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:92vw;text-align:center;z-index:50;overflow-wrap:anywhere}
   #toast.show{opacity:.95}
   [hidden]{display:none!important}
+
+  .icon:disabled{opacity:.35;cursor:default}
+  .mono small.ea{display:block;font-family:system-ui,sans-serif;font-size:10.5px;font-weight:600;color:var(--accent);letter-spacing:0}
+
+  /* ===== two-line rows (main list, near-expiry details, basket) ===== */
+  .card.list > .head, .head.wlh{display:none}
+  .row[data-key]:not(.srow) .main{grid-template-columns:34px minmax(0,1fr) auto 34px 42px;grid-template-areas:"h c e s p" "h b e s p";column-gap:8px;row-gap:2px;padding:10px 10px 10px 6px}
+  .pl .row[data-key]:not(.srow) .main{grid-template-columns:minmax(0,1fr) auto 34px 42px;grid-template-areas:"c e s p" "b e s p";padding-left:14px}
+  .row.det[data-key] .main{grid-template-areas:"h b e s p" "h b e s p";padding-left:22px}
+  .row[data-key]:not(.srow) .hrt{grid-area:h}
+  .row[data-key]:not(.srow) .cfn{grid-area:c;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row[data-key]:not(.srow) .bt{grid-area:b;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row.det[data-key] .bt{font-size:14px;color:var(--ink)}
+  .row[data-key]:not(.srow) .bt small.ea{display:inline;margin-left:6px}
+  .row[data-key]:not(.srow) .exp{grid-area:e;text-align:right;font-size:13.5px;font-weight:600}
+  .row[data-key]:not(.srow) .exp small{font-weight:500;font-size:11px;margin-top:2px}
+  .row[data-key]:not(.srow) .sem{grid-area:s;display:flex;flex-direction:column;align-items:center;font-size:15px;line-height:1.1}
+  .row[data-key]:not(.srow) .sem::before{content:"SEM";font-size:9px;font-weight:600;letter-spacing:.3px;color:var(--muted);margin-bottom:2px}
+  .row[data-key]:not(.srow) .cpw{grid-area:p;display:flex;justify-content:flex-end}
+  .cp.ic,.cp.rm{width:40px;height:40px;padding:0;display:grid;place-items:center;border-radius:12px}
+  .cp.ic::before{content:"";width:18px;height:18px;background:currentColor;-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='11' height='11' rx='2'/%3E%3Cpath d='M5 15V6a2 2 0 0 1 2-2h9'/%3E%3C/svg%3E") center/contain no-repeat;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='9' width='11' height='11' rx='2'/%3E%3Cpath d='M5 15V6a2 2 0 0 1 2-2h9'/%3E%3C/svg%3E") center/contain no-repeat}
+  .cp.ic.done{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+  .cp.ic.done::before{-webkit-mask:none;mask:none;background:none;content:"\2713\FE0E";width:auto;height:auto;font-size:16px;font-weight:700}
+  .row[data-key]:not(.srow) .hrt{min-height:40px}
+  .shead{display:none}
+  .row.srow .main{grid-template-columns:26px 34px minmax(0,1fr) auto;grid-template-areas:"k h c e" "k h b e";column-gap:8px;row-gap:2px;padding:10px 12px 10px 8px}
+  .row.srow .sck{grid-area:k;width:20px;height:20px}
+  .row.srow .hrt{grid-area:h;min-height:40px}
+  .row.srow .cfn{grid-area:c;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row.srow .bt{grid-area:b;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .row.srow .bt small.ea{display:inline;margin-left:6px}
+  .row.srow .exp{grid-area:e;text-align:right;font-size:13.5px;font-weight:600}
+  .row.srow .exp small{font-weight:500;font-size:11px;margin-top:2px}
+
+  /* ===== modern refresh ===== */
+  :root{--bg:#f3f4f7;--line:#e8eaef;--accent:#2f6bff;--radius:16px}
+  body{font-size:15px;-webkit-font-smoothing:antialiased}
+  .wrap{padding:10px 14px 90px}
+  .top{padding:12px 0 8px}
+  h1{font-size:19px;font-weight:700;letter-spacing:-.3px;white-space:nowrap}
+  .ver{border-radius:999px;padding:2px 8px}
+  .icon{border:1px solid var(--line);border-radius:14px;box-shadow:none}
+  .icon:disabled{opacity:.35;box-shadow:none}
+  .card{border:1px solid var(--line);border-radius:var(--radius);box-shadow:none;overflow:hidden}
+  .btn{border:0;border-radius:12px;padding:10px 14px;font-weight:600;background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
+  .btn.primary{box-shadow:none}
+  .search input,#sq{border:0;border-radius:14px;padding:12px 14px;background:var(--card);box-shadow:inset 0 0 0 1px var(--line)}
+  .search input:focus,#sq:focus{outline:none;box-shadow:inset 0 0 0 2px var(--accent)}
+  .drop{border-radius:var(--radius)}
+  .legend,#fileinfo{font-size:12px}
+  .row{border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .row.expired .main,.row.soon .main{box-shadow:none}
+  .row.wl .main,.row.det.wl .main{background:color-mix(in srgb,var(--accent) 7%,var(--card))}
+  .row.copied .main{background:color-mix(in srgb,#16a34a 10%,var(--card));transition:background .2s}
+  .row[data-key]:not(.srow) .main,.row.srow .main{padding-top:12px;padding-bottom:12px}
+  .row[data-key] .exp:not(.soon):not(.expired){color:var(--ink)}
+  .row.soon .exp small,.row.expired .exp small{display:table;margin:3px 0 0 auto;padding:1px 7px;border-radius:999px;font-weight:600}
+  .row.soon .exp small{background:var(--amber-bg)}
+  .row.expired .exp small{background:var(--red-bg)}
+  .cp.ic,.cp.rm{border:0;background:var(--bg);box-shadow:none;border-radius:12px;color:var(--ink)}
+  .cp.ic.done{background:#16a34a;color:#fff}
+  .hrt{color:#9aa1b0}
+  .chip{border:0;box-shadow:inset 0 0 0 1px var(--line);padding:6px 13px;font-weight:600}
+  .req input{border:0;border-radius:10px;box-shadow:inset 0 0 0 1px var(--line)}
+  .badge{box-shadow:0 0 0 2px var(--bg)}
+  /* ===== minimal theme ===== */
+  :root{--bg:#fff;--card:#fff;--ink:#14181f;--muted:#8a91a0;--line:#eef0f4;--soft:#f3f4f7;--accent:#111827;--accent-ink:#fff;--red:#d23b3b;--amber:#b7791f}
+  @media (prefers-color-scheme: dark){:root{--bg:#0f1115;--card:#0f1115;--ink:#eceef3;--muted:#7d8597;--line:#1d212a;--soft:#1a1e26;--accent:#f2f4f8;--accent-ink:#0f1115;--red:#ff7b7b;--amber:#ffb454}}
+  .wrap{padding:6px 14px 80px}
+  h1{font-size:17px;font-weight:650;letter-spacing:-.2px}
+  .ver{background:var(--soft);color:var(--muted);font-weight:600;padding:2px 6px}
+  .top{padding:10px 0 4px}
+  .icon{border:0;background:var(--soft);border-radius:50%;width:40px;height:40px}
+  .icon:disabled{opacity:.35;cursor:default}
+  .icon.sm{width:36px;height:36px}
+  .badge{top:-3px;right:-3px;border:2px solid var(--bg);box-sizing:content-box;min-width:16px;height:16px}
+  .bar{top:54px;padding:8px 0 6px}
+  .search input{border:0;background:var(--soft);border-radius:12px;padding:12px 14px}
+  .search input:focus{outline:2px solid var(--ink);outline-offset:0}
+  .btn{border:0;background:var(--soft);border-radius:10px}
+  .btn.primary{background:var(--accent);color:var(--accent-ink)}
+  .cp{background:var(--soft);border:0;border-radius:8px;padding:6px 8px}
+  .meta{margin-top:10px}
+  .chk input{accent-color:var(--accent)}
+  .legend{display:none}
+  #fileinfo{display:none}
+  .card{border:0;border-radius:0;background:none}
+  .list{border-top:1px solid var(--line)}
+  .head{border-bottom:1px solid var(--line);font-weight:500;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px}
+  .row{border-bottom:1px solid var(--line)}
+  .row.det .main{background:var(--soft)}
+  .row.wl .main,.row.det.wl .main{background:color-mix(in srgb,var(--ink) 5%,var(--bg))}
+  .row.expired .main{box-shadow:none}.row.soon .main{box-shadow:none}
+  .hrt::before{border-color:var(--line);color:var(--muted)}
+  .row.wl .hrt::before{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+  .drop{border:1.5px dashed #d5d9e1;border-radius:16px;padding:44px 16px;background:none}
+  .drop b:first-child{font-size:17px}
+  .drop b.only{font-weight:500}
+  .more{background:var(--soft)}
+
+  .mono small{display:block;font-family:system-ui,sans-serif;font-size:10.5px;color:var(--muted);letter-spacing:0}
+  .btn,.icon,.chip,.req input,.search input,#sq{box-shadow:none}
+  .search input,#sq{border:0;background:var(--soft)}
+  .search input:focus,#sq:focus{box-shadow:inset 0 0 0 2px var(--ink)}
+  .icon{border:0}
+  .card{border:0;box-shadow:none}
+  .sc{background:none;padding:0}
+  .req input{background:var(--soft);border:0}
+  .chip{background:var(--soft)}
+  .chip.on{background:var(--accent);color:var(--accent-ink)}
+  .cp.ic,.cp.rm{background:var(--soft)}
+  .ver{border-radius:6px}
+  .row.wl .main,.row.det.wl .main,.row.wl.srow .main{background:var(--soft)}
+  .row.wl .hrt::before{background-color:var(--ink);color:var(--bg)}
+  .badge{background:var(--ink);color:var(--bg)}
+  .row.srow .exp{text-align:right}
 </style>
 </head>
 <body>
 <div class="wrap">
   <div class="top">
-    <h1>CFN Expiry Search <button id="verBtn" class="ver" type="button" aria-label="What's new in V02">V02</button></h1>
-    <button id="wlBtn" class="icon" type="button" aria-label="Open wishlist">
+    <h1>CFN search <button id="verBtn" class="ver" type="button" aria-label="What's new in V02.1">V02.1</button></h1>
+    <div class="tr">
+      <button id="menuBtn" class="icon" type="button" aria-label="Sales rep" disabled>
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><circle cx="9.5" cy="7.5" r="3.3"/><path d="M3.5 20v-1.4a5.2 5.2 0 0 1 5.2-5.2h1.6"/><rect x="13.5" y="14.5" width="7.5" height="6" rx="1.4" fill="currentColor" stroke="none"/><path d="M15.3 14.5v-1.6a2 2 0 0 1 3.9 0v1.6"/></svg>
+      </button>
+          <button id="wlBtn" class="icon" type="button" aria-label="Open basket">
       <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M3 9h18l-1.8 9.6A2 2 0 0 1 17.2 20H6.8a2 2 0 0 1-2-1.4L3 9z"/>
         <path d="M8 9l3-5M16 9l-3-5"/>
-        <path d="M12 17.4l-2.9-2.8c-1.5-1.6-.6-3.5 1.1-3.5.8 0 1.4.4 1.8 1 .4-.6 1-1 1.8-1 1.7 0 2.6 1.9 1.1 3.5z" fill="#e53970" stroke="#e53970" stroke-width="1"/>
       </svg>
       <span id="wlCount" class="badge" hidden>0</span>
     </button>
+      <div id="menu" class="menu" hidden><button id="menuSales" class="mi" type="button">&#128274;&#xFE0E; Sales rep only</button></div>
+    </div>
   </div>
 
   <div id="dropzone" class="drop" tabindex="0" role="button">
     <b>Choose an Excel file (.xlsx)</b>
     <b class="only">MM0002 A-Actual Stock Report file only</b>
+    <span class="muted">Counts storage locations 1060 and 1063 only</span>
     <span>Tap to select, or drop a file here · The file is read on your device and never uploaded</span>
     <input id="file" type="file" accept=".xlsx,.xlsm" hidden>
   </div>
@@ -149,7 +307,7 @@
       </div>
       <div class="meta">
         <span id="count"></span>
-        <label class="chk" id="hideLbl"><input id="hideExp" type="checkbox"> Hide expired</label>
+        <label class="chk" id="hideLbl"><input id="hideExp" type="checkbox" checked> Hide expired</label>
         <label class="chk"><input id="nearExp" type="checkbox"> Near expiry (90 days)</label>
       </div>
     </div>
@@ -158,7 +316,6 @@
       <span><i style="background:var(--amber)"></i>Expires within 90 days</span>
       <span id="fileinfo"></span>
     </div>
-    <p class="tip">Tip: tap the heart ♡ on a row to add it to your wishlist</p>
     <div class="card list">
       <div class="head"><span></span><span>CFN</span><span id="th2">Batch</span><span>Exp</span><span class="c">SEM</span><span></span></div>
       <div id="rows"></div>
@@ -172,10 +329,11 @@
   <div class="pw">
     <div class="ph">
       <button id="wlBack" class="btn" type="button">‹ Back</button>
-      <b id="wlTitle">Wishlist</b>
+      <b id="wlTitle">Basket</b>
     </div>
     <div class="pa">
       <button id="wlCopy" class="btn primary" type="button">Copy all</button>
+      <button id="wlXls" class="btn" type="button">Excel</button>
       <button id="wlClear" class="btn" type="button">Clear all</button>
     </div>
     <div id="wlSem" class="semtot" hidden></div>
@@ -189,15 +347,56 @@
   <div class="nc">
     <h2 id="newsTitle">What's new in V02</h2>
     <p class="sub">Tap the V02 tag at the top anytime to see this again.</p>
-    <div class="demo" aria-hidden="true"><span class="dh">&#9829;&#xFE0E;</span><i class="dtrail"></i><span class="dbk" id="demoBasket"></span></div>
+    <div class="demo" aria-hidden="true"><span class="dh hrt" style="pointer-events:none"></span><i class="dtrail"></i><span class="dbk" id="demoBasket"></span></div>
     <ul>
-      <li><i>&#9829;&#xFE0E;</i><span><b>Wishlist</b> &mdash; tap the heart on any row to save it. It flies into the basket at the top right.</span></li>
+      <li><i>&#128722;&#xFE0E;</i><span><b>Add to basket</b> &mdash; tap the basket on any row to save it. It flies into the basket at the top right.</span></li>
       <li><i>&#128722;&#xFE0E;</i><span><b>Basket</b> &mdash; see everything you saved, remove items, or <b>Copy all</b> (CFN + Batch, one per line).</span></li>
-      <li><i>&#9733;&#xFE0E;</i><span><b>SEM points</b> &mdash; shown on every row and totaled in your wishlist.</span></li>
+      <li><i>&#9733;&#xFE0E;</i><span><b>SEM points</b> &mdash; shown on every row and totaled in your basket.</span></li>
       <li><i>&#8679;&#xFE0E;</i><span><b>Header stays on top</b> &mdash; the basket is always in view while you scroll.</span></li>
-      <li><i>&#9889;&#xFE0E;</i><span><b>Lighter list</b> &mdash; the wishlist is a simple tap, no swiping needed.</span></li>
+      <li><i>&#9889;&#xFE0E;</i><span><b>Lighter list</b> &mdash; adding to the basket is a simple tap, no swiping needed.</span></li>
     </ul>
     <button id="newsOk" class="btn primary" type="button">Got it</button>
+  </div>
+</div>
+<div id="pin" class="ov" hidden role="dialog" aria-modal="true" aria-labelledby="pinTitle">
+  <div class="nc">
+    <h2 id="pinTitle">Sales rep only</h2>
+    <p class="sub">Enter the 4-digit code to continue.</p>
+    <input id="pinIn" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="4" autocomplete="off" placeholder="&bull;&bull;&bull;&bull;" aria-label="Passcode">
+    <div id="pinErr" class="err" hidden>Wrong code. Please try again.</div>
+    <div class="two"><button id="pinCancel" class="btn" type="button">Cancel</button><button id="pinOk" class="btn primary" type="button">Enter</button></div>
+  </div>
+</div>
+<div id="exp" class="ov" hidden role="dialog" aria-modal="true" aria-labelledby="expTitle">
+  <div class="nc">
+    <h2 id="expTitle">Export</h2>
+    <p class="sub">Excel (.xlsx) keeps the same layout as your uploaded stock report. Copy pastes straight into Excel.</p>
+    <div id="expOpts"></div>
+    <button id="expClose" class="btn" type="button" style="width:100%;margin-top:10px">Close</button>
+  </div>
+</div>
+<div id="sales" hidden>
+  <div class="pw">
+    <div class="ph">
+      <button id="salesBack" class="btn" type="button">&lsaquo; Back</button>
+      <b>Sales rep</b>
+      <button id="salesBasket" class="icon sm" type="button" aria-label="Open basket"><span id="salesCount" class="badge" hidden>0</span></button>
+    </div>
+    <div class="card sc">
+      <input id="sq" type="search" placeholder="Search CFN, e.g. W3DR01" autocomplete="off" autocapitalize="characters" spellcheck="false">
+      <div class="req"><span>Expiry more than</span><input id="sdays" type="number" inputmode="numeric" min="0" step="1" value="180" aria-label="Days"><span>days</span></div>
+      <div class="chips">
+        <button class="chip" type="button" data-d="90">90</button><button class="chip" type="button" data-d="180">180</button><button class="chip" type="button" data-d="365">365</button><button class="chip" type="button" data-d="730">730</button>
+        <label class="chk"><input id="sNoExp" type="checkbox"> Include no-expiry</label>
+      </div>
+      <div class="req"><span>Want</span><input id="sneed" type="number" inputmode="numeric" min="1" step="1" placeholder="e.g. 10" aria-label="Pieces wanted"><span>pcs per CFN</span><button id="sPick" class="btn primary" type="button">Pick</button></div>
+    </div>
+    <div id="sCount" class="semtot"></div>
+    <div class="pa sa"><button id="sAll" class="btn" type="button">Select all</button><button id="sAdd" class="btn primary" type="button">Add to basket (0)</button><button id="sExport" class="btn" type="button">Export</button></div>
+    <div class="card" style="overflow:hidden;flex:1;min-height:0;display:flex;flex-direction:column">
+      <div class="head shead"><span></span><span></span><span>CFN</span><span>Batch</span><span>Exp</span></div>
+      <div class="pl"><div id="salesList"></div><div id="sEmpty" class="empty" hidden></div><button id="sMore" class="btn more" type="button" hidden></button></div>
+    </div>
   </div>
 </div>
 <div id="toast"></div>
@@ -330,8 +529,12 @@ function findColumns(hdr){
   if (batch < 0) batch = h.findIndex(x => /batch/i.test(x) && !/real|expir/i.test(x));
   let exp = h.findIndex(x => /expiry/i.test(x) && !/days|expired/i.test(x));
   if (exp < 0) exp = h.findIndex(x => /^exp/i.test(x) && !/days|expired/i.test(x));
-  return {cfn, batch, exp};
+  const sloc = h.findIndex(x => /^storage location code$/i.test(x));
+  let unr = h.findIndex(x => /unrestr/i.test(x) && /base/i.test(x));
+  if (unr < 0) unr = h.findIndex(x => /unrestr/i.test(x));
+  return {cfn, batch, exp, sloc, unr};
 }
+const STOCK_LOCS = ['1060', '1063'];
 async function extract(buf){
   const {z, sheets, sst} = await readSheets(buf);
   for (const sh of sheets){
@@ -340,21 +543,38 @@ async function extract(buf){
       if (!rows[i]) continue;
       const c = findColumns(Array.from(rows[i], x => x));
       if (c.cfn >= 0 && c.batch >= 0 && c.exp >= 0){
-        const seen = new Set(), out = [];
+        const seen = new Map(), out = [];
         let raw = 0;
         for (let r = i + 1; r < rows.length; r++){
           const row = rows[r]; if (!row) continue;
           const cfn = norm(row[c.cfn]); if (!cfn) continue;
+          if (c.sloc >= 0 && !STOCK_LOCS.includes(norm(row[c.sloc]))) continue;
           raw++;
           const batch = norm(row[c.batch]);
           const d = toDate(row[c.exp]);
           const key = cfn + '|' + batch + '|' + (d ? +d : '');
-          if (seen.has(key)) continue;
-          seen.add(key);
-          out.push({cfn, batch, exp: d ? +d : null});
+          const sv = c.unr >= 0 ? parseFloat(row[c.unr]) : NaN, sn = isNaN(sv) ? 0 : sv;
+          const prev = seen.get(key);
+          if (prev){ prev.src.push(r + 1); if (prev.stock != null) prev.stock += sn; continue; }
+          const item = {cfn, batch, exp: d ? +d : null, src: [r + 1], stock: c.unr >= 0 ? sn : null};
+          seen.set(key, item);
+          out.push(item);
         }
         out.sort((a, b) => (a.exp ?? Infinity) - (b.exp ?? Infinity) || a.cfn.localeCompare(b.cfn));
-        return {sheet: sh.name, rows: out, raw};
+        let orig = null;
+        try {
+          const xml = await z.text(sh.path);
+          const a = xml.indexOf('<sheetData>'), b = xml.indexOf('</sheetData>');
+          if (a > 0 && b > a){
+            const rawRows = new Map(), body = xml.slice(a, b);
+            const rowRe = /<row\b([^>]*?)(?:\/>|>[\s\S]*?<\/row>)/g; let m;
+            while ((m = rowRe.exec(body))){ const rn = /\br="(\d+)"/.exec(m[1]); if (rn) rawRows.set(+rn[1], m[0]); }
+            orig = {name: sh.name, prefix: xml.slice(0, a + 11), suffix: xml.slice(b), rawRows, hdrCount: i + 1,
+              ss: await z.text('xl/sharedStrings.xml'), styles: await z.text('xl/styles.xml')};
+            if (!orig.styles) orig = null;
+          }
+        } catch(e){ orig = null; }
+        return {sheet: sh.name, rows: out, raw, orig};
       }
     }
   }
@@ -366,6 +586,7 @@ if (typeof document !== 'undefined'){
 const $ = id => document.getElementById(id);
 const PAGE = 300, NEAR_DAYS = 90;
 let data = [], shown = PAGE, filtered = [], refs = [];
+let orig = null, byKey = new Map();
 const todayUTC = (()=>{ const n = new Date(); return Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()); })();
 const squash = s => s.toUpperCase().replace(/[\s\-_.\/]/g,'');
 const keyOf = r => r.cfn + '|' + r.batch + '|' + (r.exp == null ? '' : r.exp);
@@ -400,24 +621,26 @@ function semSpan(ms){ const v = semPts(ms); const s = el('span', 'sem', v === ''
 const wl = new Map();
 try { JSON.parse(localStorage.getItem('wl_v02') || '[]').forEach(r => { if (r && r.cfn) wl.set(keyOf(r), r); }); } catch(e){}
 function persist(){ try { localStorage.setItem('wl_v02', JSON.stringify([...wl.values()])); } catch(e){} }
-function updateBadge(){ const b = $('wlCount'); b.textContent = wl.size; b.hidden = wl.size === 0; }
+function updateBadge(){ ['wlCount', 'salesCount'].forEach(id => { const b = $(id); b.textContent = wl.size; b.hidden = wl.size === 0; }); }
 function refreshTints(){
-  document.querySelectorAll('#rows .row[data-key]').forEach(row => {
+  document.querySelectorAll('#rows .row[data-key], #salesList .row[data-key]').forEach(row => {
     const has = wl.has(row.dataset.key);
     row.classList.toggle('wl', has);
   });
 }
+const basketBtn = () => (!$('sales').hidden ? $('salesBasket') : $('wlBtn'));
 const reduceMotion = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
 function bump(){
   try {
-    $('wlBtn').animate([{transform:'scale(1)'},{transform:'scale(1.25)'},{transform:'scale(1)'}], {duration:320, easing:'ease-out'});
-    if (!$('wlCount').hidden) $('wlCount').animate([{transform:'scale(1)'},{transform:'scale(1.5)'},{transform:'scale(1)'}], {duration:360});
+    const bk = basketBtn(), bc = bk.querySelector('.badge');
+    bk.animate([{transform:'scale(1)'},{transform:'scale(1.25)'},{transform:'scale(1)'}], {duration:320, easing:'ease-out'});
+    if (bc && !bc.hidden) bc.animate([{transform:'scale(1)'},{transform:'scale(1.5)'},{transform:'scale(1)'}], {duration:360});
   } catch(e){}
 }
 function flyToBasket(src, done){
   if (!src || !src.animate || reduceMotion()){ done(); return; }
-  const a = src.getBoundingClientRect(), b = $('wlBtn').getBoundingClientRect();
-  const dot = el('div', 'fly', '\u2665\uFE0E');
+  const a = src.getBoundingClientRect(), b = basketBtn().getBoundingClientRect();
+  const dot = el('div', 'fly', '\u2713');
   dot.style.left = (a.left + a.width / 2 - 11) + 'px'; dot.style.top = (a.top + a.height / 2 - 11) + 'px';
   document.body.append(dot);
   const dx = (b.left + b.width / 2) - (a.left + a.width / 2), dy = (b.top + b.height / 2) - (a.top + a.height / 2);
@@ -433,7 +656,7 @@ function flyToBasket(src, done){
 }
 function toggleWish(r, src){
   const k = keyOf(r);
-  if (wl.has(k)){ wl.delete(k); persist(); refreshTints(); updateBadge(); toast('Removed from wishlist'); return; }
+  if (wl.has(k)){ wl.delete(k); persist(); refreshTints(); updateBadge(); toast('Removed from basket'); return; }
   wl.set(k, {cfn:r.cfn, batch:r.batch, exp:r.exp});
   persist(); refreshTints();
   flyToBasket(src, () => { updateBadge(); bump(); });
@@ -448,16 +671,17 @@ function makeRow(r, i, mode){
   const main = el('div', 'main');
   if (mode !== 'wl'){
     row.dataset.i = i;
-    const hb = el('button', 'hrt'); hb.type = 'button'; hb.setAttribute('aria-label', 'Add to wishlist');
+    const hb = el('button', 'hrt'); hb.type = 'button'; hb.setAttribute('aria-label', 'Add to basket');
     main.append(hb);
   }
   if (mode === 'det'){
-    const bt = el('span', 'mono', r.batch); bt.style.gridColumn = '2 / 4'; bt.style.paddingLeft = '8px'; main.append(bt);
-  } else main.append(el('span', 'cfn mono', r.cfn), el('span', 'mono', r.batch));
+    main.append(el('span', 'mono bt', r.batch));
+  } else if (mode === 'wl' && r.q > 1) { const b = eaCell(r.batch, r.q); b.classList.add('bt'); main.append(el('span', 'cfn mono', r.cfn), b); }
+  else main.append(el('span', 'cfn mono', r.cfn), el('span', 'mono bt', r.batch));
   main.append(expSpan(e), semSpan(r.exp));
   const w = el('span', 'cpw');
   if (mode === 'wl'){ const x = el('button', 'btn cp rm', '✕'); x.type = 'button'; x.dataset.key = k; x.setAttribute('aria-label', 'Remove'); w.append(x); }
-  else { const c = el('button', 'btn cp', 'Copy'); c.type = 'button'; c.dataset.i = i; w.append(c); }
+  else { const c = el('button', 'btn cp ic', ''); c.setAttribute('aria-label', 'Copy CFN and batch'); c.type = 'button'; c.dataset.i = i; w.append(c); }
   main.append(w); row.append(main);
   return row;
 }
@@ -529,8 +753,11 @@ rowsEl.addEventListener('click', async ev => {
     const r = refs[+b.dataset.i]; if (!r) return;
     const text = lineOf(r);
     if (await copyText(text)){
-      b.classList.add('done'); b.textContent = '✓';
-      setTimeout(() => { b.classList.remove('done'); b.textContent = 'Copy'; }, 1200);
+      document.querySelectorAll('.cp.done').forEach(x => x.classList.remove('done'));
+      document.querySelectorAll('.row.copied').forEach(x => x.classList.remove('copied'));
+      clearTimeout(window.__cpT);
+      const row = b.closest('.row'); b.classList.add('done'); row.classList.add('copied');
+      window.__cpT = setTimeout(() => { b.classList.remove('done'); row.classList.remove('copied'); }, 1200);
       toast('Copied: ' + text);
     } else toast('Copy failed. Long-press the text to copy it manually.');
     return;
@@ -548,16 +775,16 @@ rowsEl.addEventListener('click', async ev => {
 function wlItems(){ return [...wl.values()].sort((a, b) => (a.exp ?? Infinity) - (b.exp ?? Infinity) || a.cfn.localeCompare(b.cfn)); }
 function renderPanel(){
   const items = wlItems(), list = $('wlList'); list.textContent = '';
-  $('wlTitle').textContent = 'Wishlist (' + items.length + ')';
-  $('wlCopy').disabled = $('wlClear').disabled = items.length === 0;
+  $('wlTitle').textContent = 'Basket (' + items.length + ')';
+  $('wlCopy').disabled = $('wlClear').disabled = $('wlXls').disabled = items.length === 0;
   const sem = $('wlSem');
   if (items.length){
     const tot = items.reduce((s, r) => s + (semPts(r.exp) || 0), 0);
-    sem.textContent = ''; sem.append('Total SEM points: ', el('b', null, String(tot)), ' \u00B7 ' + items.length + (items.length === 1 ? ' item' : ' items'));
+    sem.textContent = ''; sem.append('Total SEM points: ', el('b', null, String(tot)), ' \u00B7 ' + items.length + (items.length === 1 ? ' batch' : ' batches') + ' \u00B7 ', el('b', null, String(items.reduce((s, r) => s + (r.q || 1), 0))), ' pcs');
     sem.hidden = false;
   } else sem.hidden = true;
   if (!items.length){
-    list.append(el('div', 'empty', 'No items yet. Tap the heart on a row to add it.'));
+    list.append(el('div', 'empty', 'No items yet. Tap + on a row to add it.'));
     return;
   }
   const frag = document.createDocumentFragment();
@@ -568,7 +795,6 @@ function openPanel(){ renderPanel(); $('wlPanel').hidden = false; document.body.
 function closePanel(){ $('wlPanel').hidden = true; document.body.style.overflow = ''; resetClear(); }
 $('wlBtn').onclick = openPanel;
 $('wlBack').onclick = closePanel;
-document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('wlPanel').hidden) closePanel(); });
 $('wlList').addEventListener('click', ev => {
   const x = ev.target.closest('.rm'); if (!x) return;
   wl.delete(x.dataset.key); persist(); refreshTints(); updateBadge(); renderPanel();
@@ -597,9 +823,9 @@ async function load(file){
   $('error').hidden = true;
   try {
     const res = await extract(await file.arrayBuffer());
-    data = res.rows; shown = PAGE; $('q').value = '';
-    $('fileinfo').textContent = file.name + ' · Sheet: ' + res.sheet;
-    $('dropzone').hidden = true; $('app').hidden = false;
+    data = res.rows; orig = res.orig; byKey = new Map(res.rows.map(r => [keyOf(r), r])); shown = PAGE; $('q').value = '';
+    $('fileinfo').textContent = file.name + ' · Sheet: ' + res.sheet + ' · Storage locations 1060 + 1063 only';
+    $('dropzone').hidden = true; $('app').hidden = false; $('menuBtn').disabled = false;
     render(); $('q').focus();
   } catch(e){
     $('error').textContent = 'Could not read the file: ' + (e.message || e); $('error').hidden = false;
@@ -614,6 +840,274 @@ $('file').onchange = e => { if (e.target.files[0]) load(e.target.files[0]); };
 ['dragleave','drop'].forEach(n => document.addEventListener(n, e => { e.preventDefault(); $('dropzone').classList.remove('over'); }));
 document.addEventListener('drop', e => { const f = e.dataTransfer && e.dataTransfer.files[0]; if (f) load(f); });
 updateBadge();
+
+/* ---------- Excel (.xlsx) writer, no library ---------- */
+const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++){ let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8){ let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+function zipStore(files){
+  const enc = new TextEncoder(), chunks = [], cds = []; let off = 0;
+  files.forEach(f => {
+    const name = enc.encode(f.name), data = enc.encode(f.text), crc = crc32(data);
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+    lh.setUint16(10, 0, true); lh.setUint16(12, 0x0021, true); lh.setUint32(14, crc, true);
+    lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true); lh.setUint16(26, name.length, true); lh.setUint16(28, 0, true);
+    chunks.push(new Uint8Array(lh.buffer), name, data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true);
+    ch.setUint16(10, 0, true); ch.setUint16(12, 0, true); ch.setUint16(14, 0x0021, true); ch.setUint32(16, crc, true);
+    ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true); ch.setUint16(28, name.length, true);
+    ch.setUint32(42, off, true);
+    cds.push(new Uint8Array(ch.buffer), name);
+    off += 30 + name.length + data.length;
+  });
+  const cdSize = cds.reduce((s, c) => s + c.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+  end.setUint32(12, cdSize, true); end.setUint32(16, off, true);
+  return new Blob([...chunks, ...cds, new Uint8Array(end.buffer)], {type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'});
+}
+const xe = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function buildXlsx(rows){
+  const str = (ref, v, s) => '<c r="' + ref + '"' + (s ? ' s="' + s + '"' : '') + ' t="inlineStr"><is><t xml:space="preserve">' + xe(v) + '</t></is></c>';
+  let sd = '<row r="1">' + ['CFN','Batch','Exp','Days left','Qty'].map((t, i) => str('ABCDE'[i] + '1', t, 2)).join('') + '</row>';
+  rows.forEach((r, i) => {
+    const n = i + 2;
+    const serial = r.exp == null ? null : Math.round((r.exp - Date.UTC(1899, 11, 30)) / 86400000);
+    sd += '<row r="' + n + '">' + str('A' + n, r.cfn) + str('B' + n, r.batch) +
+      (serial == null ? '' : '<c r="C' + n + '" s="1"><v>' + serial + '</v></c>') +
+      (r.days == null ? '' : '<c r="D' + n + '"><v>' + r.days + '</v></c>') + '<c r="E' + n + '"><v>' + r.q + '</v></c></row>';
+  });
+  const NS = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main"';
+  const files = [
+    {name:'[Content_Types].xml', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/></Types>'},
+    {name:'_rels/.rels', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/></Relationships>'},
+    {name:'xl/workbook.xml', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook ' + NS + ' xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"><sheets><sheet name="Request" sheetId="1" r:id="rId1"/></sheets></workbook>'},
+    {name:'xl/_rels/workbook.xml.rels', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>'},
+    {name:'xl/styles.xml', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><styleSheet ' + NS + '><numFmts count="1"><numFmt numFmtId="164" formatCode="dd/mm/yyyy"/></numFmts><fonts count="2"><font><sz val="11"/><name val="Calibri"/></font><font><b/><sz val="11"/><name val="Calibri"/></font></fonts><fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE8EEFF"/><bgColor indexed="64"/></patternFill></fill></fills><borders count="1"><border><left/><right/><top/><bottom/><diagonal/></border></borders><cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs><cellXfs count="3"><xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/><xf numFmtId="164" fontId="0" fillId="0" borderId="0" xfId="0" applyNumberFormat="1"/><xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1"/></cellXfs><cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles></styleSheet>'},
+    {name:'xl/worksheets/sheet1.xml', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><worksheet ' + NS + '><sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews><cols><col min="1" max="1" width="24" customWidth="1"/><col min="2" max="2" width="16" customWidth="1"/><col min="3" max="3" width="13" customWidth="1"/><col min="4" max="4" width="11" customWidth="1"/></cols><sheetData>' + sd + '</sheetData></worksheet>'}
+  ];
+  return zipStore(files);
+}
+async function saveFile(filename, blob){
+  try {
+    if (window.claude && window.claude.use){
+      const d = await window.claude.use('downloads');
+      if (d){ await d.save({filename, data: blob}); toast('Saved: ' + filename); return; }
+    }
+  } catch(e){ if (e && e.code === 'declined') return; }
+  try {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = filename;
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    toast('Downloading ' + filename);
+  } catch(e){ toast('Could not create the file. Use Copy and paste into Excel.'); }
+}
+const daysLeft = ms => Math.round((ms - todayUTC) / 86400000);
+const ymd = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+const qtyOf = r => r.q || (wl.get(keyOf(r)) || {}).q || 1;
+const exportRows = items => items.map(r => ({cfn:r.cfn, batch:r.batch, exp:r.exp, days: r.exp == null ? null : daysLeft(r.exp), q: qtyOf(r)}));
+/* Same layout as the uploaded stock report: its header rows, columns, widths and styles, with only the chosen rows. */
+function buildOriginalXlsx(items){
+  const o = orig, h = o.hdrCount, rn = (raw, n) => raw
+    .replace(/^<row\b([^>]*?)\br="\d+"/, (m, a) => '<row' + a + 'r="' + n + '"')
+    .replace(/<c\b([^>]*?)\br="([A-Z]+)\d+"/g, (m, a, c) => '<c' + a + 'r="' + c + n + '"');
+  let n = h, body = '';
+  items.forEach(it => it.src.forEach((num, idx) => {
+    const raw = o.rawRows.get(num); if (!raw) return; n++;
+    let x = rn(raw, n);
+    if (idx === 0) x = x.replace(/<\/row>\s*$/, '<c r="AC' + n + '"><v>' + it.q + '</v></c></row>');
+    body += x;
+  }));
+  let head = ''; for (let i = 1; i <= h; i++) if (o.rawRows.get(i)) head += o.rawRows.get(i);
+  head = head.replace(/<\/row>\s*$/, '<c r="AC' + h + '" t="inlineStr"><is><t>Qty requested</t></is></c></row>');
+  const prefix = o.prefix.replace(/<dimension ref="A1:([A-Z]+)\d+"\/>/, (m, c) => '<dimension ref="A1:AC' + n + '"/>').replace('</cols>', '<col min="29" max="29" width="14" customWidth="1"/></cols>');
+  let suf = o.suffix;
+  ['autoFilter','conditionalFormatting','dataValidations','hyperlinks','tableParts','drawing','legacyDrawing','ignoredErrors'].forEach(t => {
+    suf = suf.replace(new RegExp('<' + t + '\\b[^>]*/>', 'g'), '').replace(new RegExp('<' + t + '\\b[^>]*>[\\s\\S]*?</' + t + '>', 'g'), '');
+  });
+  suf = suf.replace(/<mergeCells[\s\S]*?<\/mergeCells>/, m => {
+    const keep = [...m.matchAll(/<mergeCell ref="[A-Z]+\d+:[A-Z]+(\d+)"\/>/g)].filter(x => +x[1] <= h).map(x => x[0]);
+    return keep.length ? '<mergeCells count="' + keep.length + '">' + keep.join('') + '</mergeCells>' : '';
+  });
+  const R = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships', hasSS = !!o.ss;
+  const files = [
+    {name:'[Content_Types].xml', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/><Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/><Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>' + (hasSS ? '<Override PartName="/xl/sharedStrings.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sharedStrings+xml"/>' : '') + '</Types>'},
+    {name:'_rels/.rels', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="' + R + '/officeDocument" Target="xl/workbook.xml"/></Relationships>'},
+    {name:'xl/workbook.xml', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="' + R + '"><sheets><sheet name="' + xe(o.name) + '" sheetId="1" r:id="rId1"/></sheets></workbook>'},
+    {name:'xl/_rels/workbook.xml.rels', text:'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="' + R + '/worksheet" Target="worksheets/sheet1.xml"/><Relationship Id="rId2" Type="' + R + '/styles" Target="styles.xml"/>' + (hasSS ? '<Relationship Id="rId3" Type="' + R + '/sharedStrings" Target="sharedStrings.xml"/>' : '') + '</Relationships>'},
+    {name:'xl/styles.xml', text:o.styles},
+    {name:'xl/worksheets/sheet1.xml', text:prefix + head + body + suf}
+  ];
+  if (hasSS) files.splice(5, 0, {name:'xl/sharedStrings.xml', text:o.ss});
+  return zipStore(files);
+}
+function exportXlsx(items, tag){
+  if (!items.length){ toast('Nothing to export'); return; }
+  let blob = null, name = 'CFN-' + tag + '_' + ymd() + '.xlsx', missing = 0;
+  if (orig){
+    const found = [];
+    items.forEach(it => { const d = byKey.get(keyOf(it)); if (d) found.push(Object.assign({}, d, {q: qtyOf(it)})); else missing++; });
+    if (found.length){ try { blob = buildOriginalXlsx(found); name = 'Stock-Report_' + tag + '_' + ymd() + '.xlsx'; } catch(e){ blob = null; } }
+  }
+  if (!blob){ blob = buildXlsx(exportRows(items)); missing = 0; }
+  saveFile(name, blob).then(() => { if (missing) setTimeout(() => toast(missing + ' item(s) are not in the loaded file and were left out'), 2000); });
+}
+async function exportCopy(items){
+  if (!items.length){ toast('Nothing to copy'); return; }
+  const lines = ['CFN\tBatch\tExp\tDays left\tQty'].concat(exportRows(items).map(r => [r.cfn, r.batch, r.exp == null ? '' : fmt(r.exp), r.days == null ? '' : r.days, r.q].join('\t')));
+  toast(await copyText(lines.join('\n')) ? 'Copied ' + items.length + ' rows. Paste into Excel.' : 'Copy failed. Please try again.');
+}
+$('wlXls').onclick = () => exportXlsx(wlItems(), 'basket');
+
+/* ---------- menu + passcode ---------- */
+const SALES_PIN = '4076';
+$('menuBtn').onclick = e => { e.stopPropagation(); $('menu').hidden = !$('menu').hidden; };
+document.addEventListener('click', e => { if (!$('menu').hidden && !e.target.closest('#menu')) $('menu').hidden = true; });
+$('menuSales').onclick = () => { $('menu').hidden = true; openPin(); };
+function openPin(){ $('pinIn').value = ''; $('pinErr').hidden = true; $('pin').hidden = false; setTimeout(() => $('pinIn').focus(), 60); }
+function closePin(){ $('pin').hidden = true; $('pinIn').blur(); }
+function tryPin(){
+  if ($('pinIn').value === SALES_PIN){ closePin(); openSales(); return; }
+  $('pinErr').hidden = false;
+  const nc = $('pin').querySelector('.nc'); nc.classList.remove('bad'); void nc.offsetWidth; nc.classList.add('bad');
+  $('pinIn').value = ''; $('pinIn').focus();
+}
+$('pinIn').addEventListener('input', () => {
+  const v = $('pinIn').value.replace(/\D/g, '').slice(0, 4); $('pinIn').value = v; $('pinErr').hidden = true;
+  if (v.length === 4) tryPin();
+});
+$('pinIn').addEventListener('keydown', e => { if (e.key === 'Enter') tryPin(); });
+$('pinOk').onclick = tryPin; $('pinCancel').onclick = closePin;
+$('pin').addEventListener('click', e => { if (e.target === $('pin')) closePin(); });
+
+/* ---------- Sales rep page ---------- */
+const SPAGE = 200;
+const sSel = new Map();
+let sShown = SPAGE, sList = [], sRefs = [];
+try { $('salesBasket').prepend($('wlBtn').querySelector('svg').cloneNode(true)); } catch(e){}
+function computeSales(){
+  const minDays = Math.max(0, parseInt($('sdays').value, 10) || 0);
+  const q = squash($('sq').value), inc = $('sNoExp').checked;
+  const list = data.filter(r => r.exp != null && daysLeft(r.exp) > minDays &&
+    (inc || new Date(r.exp).getUTCFullYear() < 2099) && (!q || squash(r.cfn).includes(q)));
+  list.sort((a, b) => a.cfn.localeCompare(b.cfn) || b.exp - a.exp || a.batch.localeCompare(b.batch));
+  return {list, minDays};
+}
+function eaCell(batch, n){
+  const s = el('span', 'mono', batch);
+  if (n != null && n > 1) s.append(el('small', 'ea', n + ' EA'));
+  return s;
+}
+function makeSalesRow(r, i){
+  const e = expInfo(r.exp), k = keyOf(r);
+  const row = el('div', 'row srow' + (e.cls ? ' ' + e.cls : '')); row.dataset.key = k; row.dataset.i = i;
+  if (wl.has(k)) row.classList.add('wl');
+  const main = el('div', 'main');
+  const cb = el('input', 'sck'); cb.type = 'checkbox'; cb.checked = sSel.has(k); cb.setAttribute('aria-label', 'Select');
+  const hb = el('button', 'hrt'); hb.type = 'button'; hb.setAttribute('aria-label', 'Add to basket');
+  main.append(cb, hb, el('span', 'cfn mono', r.cfn), (b => (b.classList.add('bt'), b))(eaCell(r.batch, r.stock)), expSpan(e));
+  row.append(main); return row;
+}
+function updateSalesBar(){
+  const n = sSel.size;
+  $('sAdd').textContent = 'Add to basket (' + n + ')'; $('sAdd').disabled = n === 0;
+  const all = sList.length > 0 && sList.every(r => sSel.has(keyOf(r)));
+  $('sAll').textContent = all ? 'Deselect all' : 'Select all'; $('sAll').disabled = sList.length === 0;
+  document.querySelectorAll('#sales .chip').forEach(c => c.classList.toggle('on', c.dataset.d === String(parseInt($('sdays').value, 10))));
+}
+function renderSales(reset){
+  if (reset) sShown = SPAGE;
+  const body = $('salesList'); body.textContent = ''; sRefs = [];
+  if (!data.length){
+    sList = []; $('sCount').textContent = ''; $('sMore').hidden = true;
+    $('sEmpty').textContent = 'Load the stock Excel file first: tap Back, then choose the file.'; $('sEmpty').hidden = false;
+    updateSalesBar(); return;
+  }
+  const {list, minDays} = computeSales(); sList = list;
+  const frag = document.createDocumentFragment();
+  list.slice(0, sShown).forEach(r => { sRefs.push(r); frag.append(makeSalesRow(r, sRefs.length - 1)); });
+  body.append(frag);
+  $('sCount').textContent = list.length.toLocaleString() + ' batches · ' + new Set(list.map(r => r.cfn)).size + ' CFN with Exp more than ' + minDays + ' days';
+  $('sEmpty').textContent = 'No batches match.'; $('sEmpty').hidden = list.length > 0;
+  const rest = list.length - sShown; $('sMore').hidden = rest <= 0;
+  if (rest > 0) $('sMore').textContent = 'Show more (' + rest.toLocaleString() + ' left)';
+  updateSalesBar();
+}
+function openSales(){ $('sales').hidden = false; document.body.style.overflow = 'hidden'; renderSales(true); }
+function closeSales(){ $('sales').hidden = true; document.body.style.overflow = ''; }
+$('salesBack').onclick = closeSales;
+$('salesBasket').onclick = openPanel;
+$('sMore').onclick = () => { sShown += SPAGE; renderSales(false); };
+let sqT; $('sq').addEventListener('input', () => { clearTimeout(sqT); sqT = setTimeout(() => renderSales(true), 120); });
+$('sdays').addEventListener('input', () => { clearTimeout(sqT); sqT = setTimeout(() => renderSales(true), 200); });
+$('sNoExp').onchange = () => renderSales(true);
+document.querySelectorAll('#sales .chip').forEach(c => c.onclick = () => { $('sdays').value = c.dataset.d; renderSales(true); });
+$('salesList').addEventListener('change', ev => {
+  const cb = ev.target.closest('.sck'); if (!cb) return;
+  const r = sRefs[+cb.closest('.row').dataset.i]; if (!r) return;
+  if (cb.checked) sSel.set(keyOf(r), r); else sSel.delete(keyOf(r));
+  updateSalesBar();
+});
+$('salesList').addEventListener('click', ev => {
+  const hb = ev.target.closest('.hrt'); if (!hb) return;
+  const r = sRefs[+hb.closest('.row').dataset.i]; if (r) toggleWish(r, hb);
+});
+$('sPick').onclick = () => {
+  const need = Math.max(0, parseInt($('sneed').value, 10) || 0);
+  if (!need){ toast('Enter how many pcs you want'); $('sneed').focus(); return; }
+  if (!sList.length){ toast('No batches to pick from'); return; }
+  const by = new Map(); sList.forEach(r => { if (!by.has(r.cfn)) by.set(r.cfn, []); by.get(r.cfn).push(r); });
+  let added = 0; const short = [];
+  by.forEach((rows, cfn) => {
+    rows.forEach(r => wl.delete(keyOf(r)));
+    let left = need;
+    for (const r of rows){
+      if (left <= 0) break;
+      const avail = r.stock == null ? 1 : Math.floor(r.stock); if (avail <= 0) continue;
+      const t = Math.min(avail, left);
+      wl.set(keyOf(r), {cfn:r.cfn, batch:r.batch, exp:r.exp, q:t}); left -= t; added += t;
+    }
+    if (left > 0) short.push(cfn + ' ' + (need - left) + '/' + need);
+  });
+  persist(); refreshTints(); updateBadge(); bump();
+  toast('Picked ' + added + ' pcs' + (short.length ? '. Not enough: ' + short.slice(0, 3).join(', ') + (short.length > 3 ? '\u2026' : '') : ''));
+};
+$('sAll').onclick = () => {
+  const all = sList.length > 0 && sList.every(r => sSel.has(keyOf(r)));
+  sList.forEach(r => { if (all) sSel.delete(keyOf(r)); else sSel.set(keyOf(r), r); });
+  document.querySelectorAll('#salesList .sck').forEach(c => { c.checked = !all; });
+  updateSalesBar();
+};
+$('sAdd').onclick = () => {
+  let added = 0;
+  sSel.forEach((r, k) => { if (!wl.has(k)){ wl.set(k, {cfn:r.cfn, batch:r.batch, exp:r.exp}); added++; } });
+  const n = sSel.size; sSel.clear();
+  document.querySelectorAll('#salesList .sck').forEach(c => { c.checked = false; });
+  persist(); refreshTints(); updateBadge(); bump(); updateSalesBar();
+  toast('Added ' + added + ' to basket' + (added < n ? ' (' + (n - added) + ' already there)' : ''));
+};
+
+/* ---------- export sheet ---------- */
+function openExport(){
+  const opts = [['Basket', wlItems(), 'basket'], ['Selected', [...sSel.values()], 'selected'], ['All results', sList, 'request']];
+  const box = $('expOpts'); box.textContent = '';
+  opts.forEach(([label, items, tag]) => {
+    const row = el('div', 'xo'); row.append(el('span', null, label + ' (' + items.length + ')'));
+    const x = el('button', 'btn', 'Excel'), c = el('button', 'btn', 'Copy');
+    x.type = c.type = 'button'; x.disabled = c.disabled = items.length === 0;
+    x.onclick = () => exportXlsx(items, tag); c.onclick = () => exportCopy(items);
+    row.append(x, c); box.append(row);
+  });
+  $('exp').hidden = false;
+}
+$('sExport').onclick = openExport;
+$('expClose').onclick = () => { $('exp').hidden = true; };
+$('exp').addEventListener('click', e => { if (e.target === $('exp')) $('exp').hidden = true; });
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (!$('pin').hidden) closePin(); else if (!$('exp').hidden) $('exp').hidden = true;
+  else if (!$('wlPanel').hidden) closePanel(); else if (!$('sales').hidden) closeSales();
+});
 
 /* ---------- update notice (shown once per version) ---------- */
 const NEWS_KEY = 'news_seen_v02c';
